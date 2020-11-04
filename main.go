@@ -29,6 +29,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
+	apiv1 "github.com/openshift/kata-operator/api/v1"
 	kataconfigurationv1 "github.com/openshift/kata-operator/api/v1"
 	"github.com/openshift/kata-operator/controllers"
 	// +kubebuilder:scaffold:imports
@@ -47,6 +48,7 @@ func init() {
 	utilruntime.Must(mcfgapi.Install(scheme))
 
 	utilruntime.Must(kataconfigurationv1.AddToScheme(scheme))
+	utilruntime.Must(apiv1.AddToScheme(scheme))
 	// +kubebuilder:scaffold:scheme
 }
 
@@ -97,6 +99,10 @@ func main() {
 			setupLog.Error(err, "unable to create KataConfig controller for Kubernetes cluster", "controller", "KataConfig")
 			os.Exit(1)
 		}
+	}
+	if err = (&apiv1.KataConfig{}).SetupWebhookWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create webhook", "webhook", "KataConfig")
+		os.Exit(1)
 	}
 	// +kubebuilder:scaffold:builder
 
